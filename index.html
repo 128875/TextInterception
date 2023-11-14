@@ -62,6 +62,7 @@
     imagePreview.addEventListener('mousedown', (event) => {
       event.preventDefault();
       dragging = true;
+      imagePreview.style.cursor = 'grabbing'; // 鼠标按下时改为抓取光标
       let startX = event.clientX - posX;
       let startY = event.clientY - posY;
 
@@ -77,6 +78,7 @@
         dragging = false;
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
+        imagePreview.style.cursor = 'grab'; // 鼠标释放时恢复原样
       }
 
       document.addEventListener('mousemove', onMouseMove);
