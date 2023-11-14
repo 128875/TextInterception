@@ -1,0 +1,21 @@
+.error-message {
+    visibility: hidden; /* 默认不可见 */
+    opacity: 0;
+    background-color: #000000; /* 错误提示的背景色 */
+    color: white; /* 文字颜色 */
+    text-align: center;
+    border-radius: 8px;
+    padding: 8px;
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 10px; /* 在drop-zone底部显示 */
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  
+  .error-message.show {
+    visibility: visible;
+    opacity: 1;
+  }
+  

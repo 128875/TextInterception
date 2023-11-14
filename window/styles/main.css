@@ -1,0 +1,121 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #27292F;
+    /* 主背景色 */
+    color: #FFFFFF;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.top-nav {
+    background-color: rgb(38, 36, 41);
+    /* 导航栏背景色 */
+    padding: 10px 20px;
+    /* 顶部和侧面的内边距 */
+    display: flex;
+    align-items: center;
+    /* 垂直居中 */
+}
+
+.nav-item {
+    margin-right: 20px;
+    /* 导航项之间的间距 */
+    cursor: pointer;
+}
+
+.nav-item:last-child {
+    margin-right: 0;
+    /* 最后一个导航项不需要右边距 */
+}
+
+.drop-zone {
+    flex-grow: 1;
+    border: 1px dashed #3B3C40;
+    /* 与原型图中的边框颜色一致 */
+    margin: 20px;
+    /* 与顶部导航栏相同的外边距 */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    /* 设置最小高度，确保小图像时drop-zone的大小 */
+    min-height: 200px;
+}
+
+.drop-zone label {
+    display: block;
+    margin: auto;
+    cursor: pointer;
+}
+
+label[for="file-input"]::after {
+    content: "支持 .png/.jpg/.jpeg";
+    color: #808080;
+    /* 灰色文本 */
+    font-size: 0.8em;
+    /* 较小的字体大小 */
+    display: block;
+    /* 使伪元素表现得像块级元素 */
+    text-align: center;
+    /* 文本居中 */
+    margin-top: 10px;
+    /* 与上面的元素有一些间隔 */
+}
+
+#file-input {
+    display: none;
+    /* 隐藏真实的文件输入元素 */
+}
+
+#image-container {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 95%;
+}
+
+#image-preview {
+    display: block;
+    /* 默认不显示 */
+    width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgb(142, 142, 160);
+    /* 删除按钮的背景颜色 */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    /* 默认不显示 */
+    display: None;
+    z-index: 1000;
+
+    padding: 5px;
+    /* 提供足够的空间来绘制垃圾桶 */
+    line-height: 0;
+    /* 删除行高，以便内部元素正确对齐 */
+    overflow: visible;
+    /* 确保垃圾桶的盖子可见 */
+}

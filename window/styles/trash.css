@@ -1,0 +1,32 @@
+/* 垃圾桶的盖子 */
+.trash-lid {
+  width: 50%; /* 盖子的宽度 */
+  height: 3px; /* 盖子的高度，可以调整以改变粗细 */
+  background-color: #fff; /* 盖子的颜色 */
+  margin-bottom: 2px;
+  border-radius: 2px;
+  position: absolute;
+  top: 6px;
+  left: 25%; /* 根据盖子宽度调整左边距以居中 */
+}
+
+/* 垃圾桶的主体 */
+.trash-container {
+  width: 40%; /* 主体的宽度 */
+  height: 12px; /* 主体的高度 */
+  background-color: #fff; /* 主体的颜色 */
+  border-radius: 2px 2px 0 0;
+  position: absolute;
+  top: 12px;
+  left: 30%; /* 根据主体宽度调整左边距以居中 */
+}
+
+/* 垃圾桶的线条 */
+.trash-line {
+  width: 1px; /* 线条的宽度，可以调整以改变粗细 */
+  height: 8px; /* 线条的高度 */
+  background-color: #fff; /* 线条的颜色，统一为白色 */
+  position: absolute;
+  top: 14px;
+  left: 50%;
+}

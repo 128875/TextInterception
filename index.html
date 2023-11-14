@@ -4,107 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Text Interception App</title>
-  <style>
-    body,
-    html {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background-color: #27292F;
-      /* 主背景色 */
-      color: #FFFFFF;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .app-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .top-nav {
-      background-color: rgb(38, 36, 41);
-      /* 导航栏背景色 */
-      padding: 10px 20px;
-      /* 顶部和侧面的内边距 */
-      display: flex;
-      align-items: center;
-      /* 垂直居中 */
-    }
-
-    .nav-item {
-      margin-right: 20px;
-      /* 导航项之间的间距 */
-      cursor: pointer;
-    }
-
-    .nav-item:last-child {
-      margin-right: 0;
-      /* 最后一个导航项不需要右边距 */
-    }
-
-    .drop-zone {
-      flex-grow: 1;
-      border: 1px dashed #3B3C40;
-      /* 与原型图中的边框颜色一致 */
-      margin: 20px;
-      /* 与顶部导航栏相同的外边距 */
-      border-radius: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-
-      /* 设置最小高度，确保小图像时drop-zone的大小 */
-      min-height: 200px;
-    }
-
-    .drop-zone label {
-      display: block;
-      margin: auto;
-      cursor: pointer;
-    }
-
-    #file-input {
-      display: none;
-      /* 隐藏真实的文件输入元素 */
-    }
-
-    #image-container {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      width: 100%;
-      height: calc(100% - 40px);
-    }
-
-    #image-preview {
-      display: block;
-      /* 默认不显示 */
-      width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .delete-button {
-      position: absolute;
-      top: 0px;
-      right: 0px;
-      background-color: rgb(142, 142, 160);
-      /* 删除按钮的背景颜色 */
-      color: #FFFFFF;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      display: block;
-      /* 默认不显示 */
-    }
-  </style>
+  <link rel="stylesheet" href="window/styles/trash.css">
+  <link rel="stylesheet" href="window/styles/main.css">
+  <link rel="stylesheet" href="window/styles/error.css">
 </head>
 
 <body>
@@ -117,11 +19,18 @@
     <div class="drop-zone">
       <label for="file-input">点击或拖拽图片到此区域</label>
       <input type="file" id="file-input" accept="image/*">
+      <div id="error-message" class="error-message"></div>
+
       <div id="image-container">
         <img id="image-preview">
-        <button class="delete-button">X</button>
       </div>
-
+      <button class="delete-button">
+        <div class="trash-lid"></div>
+        <div class="trash-container"></div>
+        <div class="trash-line"></div>
+        <div class="trash-line"></div>
+        <div class="trash-line"></div>
+      </button>
     </div>
   </div>
 
@@ -131,17 +40,98 @@
     const imageContainer = document.getElementById('image-container');
     const imagePreview = document.getElementById('image-preview');
     const deleteButton = document.querySelector('.delete-button');
+    const errorMessage = document.getElementById('error-message');
+    let errorTimeout; // 用于保存计时器ID的变量
 
-    // 拉入图片 三个事件
+    // 缩放比例
+    let scale = 1;
+    let posX = 0;
+    let posY = 0;
+    let dragging = false;
+
+    // 图片缩放
+    imagePreview.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      scale += event.deltaY * -0.0025;
+      // 限制缩放范围
+      scale = Math.min(Math.max(.1, scale), 10);
+      imagePreview.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    });
+
+    // 开始拖动
+    imagePreview.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      dragging = true;
+      let startX = event.clientX - posX;
+      let startY = event.clientY - posY;
+
+      function onMouseMove(e) {
+        if (dragging) {
+          posX = e.clientX - startX;
+          posY = e.clientY - startY;
+          imagePreview.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+      }
+
+      function onMouseUp() {
+        dragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    // 文件选择事件
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      handleFileSelect(file);
+    });
+
+    // 处理文件选择
+    function handleFileSelect(file) {
+      if (file) {
+        
+        // 在有error计时器清除
+        clearTimeout(errorTimeout)
+        
+        if (!file.type.match('image/png|image/jpeg')) {
+          errorMessage.textContent = '文件类型不支持';
+          errorMessage.classList.add('show');
+          errorTimeout = setTimeout(() => { errorMessage.classList.remove('show'); }, 3000); // 3秒后消失
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          errorMessage.textContent = '文件过大,不能超过10MB';
+          errorMessage.classList.add('show');
+          errorTimeout = setTimeout(() => { errorMessage.classList.remove('show'); }, 3000); // 3秒后消失
+          return;
+        }
+        // 如果文件有效，清除任何现有的错误消息
+        errorMessage.classList.remove('show');
+        // 清除计时器
+        clearTimeout(errorTimeout)
+
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          imagePreview.src = reader.result;
+          imageContainer.style.display = 'block';
+          // 显示图片预览时隐藏 label
+          dropZone.querySelector('label').style.display = 'None'
+        });
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 以下是拖放事件的处理
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.classList.add('dragover');
     });
-
     dropZone.addEventListener('dragleave', () => {
       dropZone.classList.remove('dragover');
     });
-
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.classList.remove('dragover');
@@ -149,53 +139,55 @@
       handleFileSelect(file);
     });
 
-    // 文件改动事件
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      handleFileSelect(file);
-    });
-
     // 粘贴事件处理
     document.addEventListener('paste', (e) => {
-      const items = e.clipboardData.items;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const file = items[i].getAsFile();
-          handleFileSelect(file);
+      const items = e.clipboardData && e.clipboardData.items;
+      let image = null;
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') >= 0) {
+            image = items[i].getAsFile();
+            break;
+          }
+        }
+        if (image) {
+          handleFileSelect(image);
         }
       }
     });
 
     // 点击删除按钮
     deleteButton.addEventListener('click', () => {
-      imagePreview.src = '';
-      // 隐藏图片预览时显示label
-      imageContainer.style.display = 'None';
-      dropZone.querySelector('label').style.display = 'block'
-      fileInput.value = '';
+      imagePreview.src = ''; // 移除图片源
+      imageContainer.style.display = 'none'; // 隐藏图片容器
+      deleteButton.style.display = 'none'; // 隐藏删除按钮
+      dropZone.querySelector('label').style.display = 'block'; // 显示上传标签
+      fileInput.value = ''; // 重置文件输入
+      scale = 1; // 重置缩放比例为1
+      posX = 0; // 重置X位置为0
+      posY = 0; // 重置Y位置为0
+      dragging = false; // 停止拖动状态
+      imagePreview.style.transform = 'translate(0px, 0px) scale(1)'; // 重置变换效果
     });
 
     // imagePreview 引入划入事件
     imageContainer.addEventListener('mouseover', () => {
       deleteButton.style.display = 'block'
     })
-    // imagePreview 引入划出事件
     imageContainer.addEventListener('mouseout', () => {
-      deleteButton.style.display = 'none'
-    })
-
-    function handleFileSelect(file) {
-      if (file) {
-        const reader = new FileReader();
-        reader.addEventListener('load', () => {
-          imagePreview.src = reader.result;
-          imageContainer.style.display = 'flex';
-          // 显示图片预览时隐藏 label
-          dropZone.querySelector('label').style.display = 'None'
-        });
-        reader.readAsDataURL(file);
+      if (!dragging) { // 当不在拖动状态时才隐藏删除按钮
+        deleteButton.style.display = 'none';
       }
-    }
+    })
+    // 需要更新删除按钮的事件监听器，确保它不会隐藏自己
+    deleteButton.addEventListener('mouseover', () => {
+      deleteButton.style.display = 'block';
+    });
+    deleteButton.addEventListener('mouseout', () => {
+      deleteButton.style.display = 'none';
+    });
+
+
 
   </script>
 </body>
