@@ -95,7 +95,7 @@
         
         // 在有error计时器清除
         clearTimeout(errorTimeout)
-        
+
         if (!file.type.match('image/png|image/jpeg')) {
           errorMessage.textContent = '文件类型不支持';
           errorMessage.classList.add('show');
@@ -186,8 +186,6 @@
     deleteButton.addEventListener('mouseout', () => {
       deleteButton.style.display = 'none';
     });
-
-
 
   </script>
 </body>
